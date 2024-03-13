@@ -1,0 +1,67 @@
+### CREATE
+POST http://api-mfconsultoria.sharp/users
+Authorization: Bearer 4f697335ad242d39aa95435e9b25e7dd
+Content-Type: application/json
+
+{
+  "name": "Sharp 2",
+  "email": "testes2@sharpsolucoes.com",
+  "phone": "(37) 99835-8807",
+  "passwordConfirmation": "123456",
+  "status": "true",
+	"permissions" : {
+		"users" : {
+			"read": true,
+			"create": true,
+			"update": true,
+      		"delete": true
+		},
+		"clients" : {
+			"read": true,
+			"create": true,
+			"update": true,
+      		"delete": true
+		}
+  }
+}
+
+### READ
+GET http://api-mfconsultoria.sharp/users
+Authorization: Bearer 4f697335ad242d39aa95435e9b25e7dd
+Content-Type: application/json
+
+### UPDATE
+PUT http://api-mfconsultoria.sharp/users
+Authorization: Bearer 4f697335ad242d39aa95435e9b25e7dd
+Content-Type: application/json
+
+{
+  "id": 2,
+  "name": "Sharp 2 Edit",
+  "email": "testes2@sharpsolucoes.com",
+  "phone": "(37) 99835-8807",
+  "passwordConfirmation": "123456",
+  "changePassword": true,
+  "status": "true",
+	"permissions" : {
+		"users" : {
+			"read": true,
+			"create": true,
+			"update": true,
+      		"delete": true
+		},
+		"clients" : {
+			"read": true,
+			"create": true,
+			"update": true,
+      		"delete": true
+		}
+  }
+}
+
+
+### DELETE
+
+DELETE http://api-mfconsultoria.sharp/users/2-sharp-2-edit
+Authorization: Bearer 4f697335ad242d39aa95435e9b25e7dd
+Content-Type: application/json

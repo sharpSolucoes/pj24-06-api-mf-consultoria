@@ -1,0 +1,8 @@
+POST http://api-mfconsultoria.sharp/me/login
+Authorization: SECRET_KEY
+Content-Type: application/json
+
+{
+  "email": "testes@sharpsolucoes.com",
+  "password": "123456"
+}
