@@ -1,6 +1,5 @@
-## Projeto PJ23-27: EMATER
+# pj24-06-mf-consultoria
 
 **Notas da versão:**
 
-- [x] Feitas as configurações necessárias para iniciar o projeto;
-- [x] Desenvolvimento do CRUD(Criação, Leitura, Atualização e Deleção) de usuários.
+- [x] Desenvolvimento do CRUD(Criação, Leitura, Atualização e Deleção) de Clientes, com isso também foi adicionado o CRUD de usuários do cliente e também relatórios do cliente, uma vez que funcionam a partir de um cliente.

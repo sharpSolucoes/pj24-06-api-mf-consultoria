@@ -172,7 +172,7 @@ class Users extends API_configuration
 
     protected function verify_exist_email(string $email, string $id = "")
     {
-        $sql = 'SELECT `id` FROM `users` WHERE `email` = "' . $email . '"';
+        $sql = 'SELECT `id` FROM `users` WHERE `email` = "' . $email . '" AND `is_deleted` = "false"';
         $get_user_email = $this->db_read($sql);
         if ($this->db_num_rows($get_user_email) > 0) {
             $user_data = $this->db_object($get_user_email);
