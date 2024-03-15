@@ -13,7 +13,7 @@ class Clients_Reports extends API_configuration
         "' . $url . '"
       ';
 
-        $sql = 'INSERT INTO `clients_reports` (`client_id`, `description`, `url`) VALUES (' . $values . ')';
+        $sql = 'INSERT INTO `clients_reports` (`client_id`, `client_report_description`, `client_report_url`) VALUES (' . $values . ')';
         $create_client_report = $this->db_create($sql);
         if ($create_client_report) {
             $this->generate_user_log("client.create_report");
@@ -27,7 +27,7 @@ class Clients_Reports extends API_configuration
     public function read_by_client_id(
         int $client_id
     ) {
-        $sql = "SELECT `id`, `description`, `url` FROM `clients_reports` WHERE `client_id` = " . $client_id . " AND `is_deleted` = 'false'";
+        $sql = "SELECT `client_report_id` AS 'id', `client_report_description` AS 'description', `client_report_url` AS 'url' FROM `clients_reports` WHERE `client_id` = " . $client_id . " AND `client_report_is_deleted` = 'false'";
         $get_reports = $this->db_read($sql);
         if ($this->db_num_rows($get_reports) > 0) {
             $reports = [];
@@ -49,10 +49,10 @@ class Clients_Reports extends API_configuration
         $url = $parms->url;
 
         $values = '
-            `description` = "' . $description . '",
-            `url` = "' . $url . '"';
+            `client_report_description` = "' . $description . '",
+            `client_report_url` = "' . $url . '"';
 
-        $sql = 'UPDATE `clients_reports` SET ' . $values . ' WHERE `id` = ' . $id;
+        $sql = 'UPDATE `clients_reports` SET ' . $values . ' WHERE `client_report_id` = ' . $id;
         $update_client_report = $this->db_update($sql);
         if ($update_client_report) {
             $this->generate_user_log("client.update_report");
@@ -65,7 +65,7 @@ class Clients_Reports extends API_configuration
 
     public function delete(int $id)
     {
-        $sql = "UPDATE `clients_reports` SET `is_deleted` = 'true' WHERE `id` = " . $id;
+        $sql = "UPDATE `clients_reports` SET `client_report_is_deleted` = 'true' WHERE `client_report_id` = " . $id;
         $delete_client_report = $this->db_delete($sql);
         if ($delete_client_report) {
             $this->generate_user_log("client.delete_report");

@@ -5,6 +5,7 @@ class API_configuration
     private string $api_token;
     protected string $today;
     protected string $now;
+    protected string $base_url_image;
     public string $token = "";
     public object $get;
     public object $headers;
@@ -28,11 +29,14 @@ class API_configuration
             $connection = mysqli_connect($server, $user, $password, $db_name);
         }
 
+        $protocol = 
+
 
         $this->api_token = $api_token;
         $this->connection = $connection;
         $this->today = date("Y-m-d");
         $this->now = date("Y-m-d H:i:s");
+        $this->base_url_image = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . "/public/images/";
         $this->get = (object) $_GET;
         $this->headers = (object) getallheaders();
     }
@@ -239,7 +243,7 @@ class API_configuration
     {
         if ($type == "user") {
             $sql_token = str_replace("Bearer ", "", $this->token);
-            $sql = 'SELECT `user_id`, `expires` FROM `api_sessions` WHERE `token` = "' . addslashes($sql_token) . '"';
+            $sql = 'SELECT `user_id`, `api_session_expires` AS "expires" FROM `api_sessions` WHERE `api_session_token` = "' . addslashes($sql_token) . '"';
             $get_user_token_data = $this->db_read($sql);
             if ($this->db_num_rows($get_user_token_data) > 0) {
                 $user_token_data = $this->db_object($get_user_token_data);
@@ -265,16 +269,16 @@ class API_configuration
         string $description = null,
         int $user_id = null
     ) {
-        $sql = 'SELECT `id`, `action` FROM `users_logs` WHERE `user_id`=' . ($user_id != null ? $user_id : $_SESSION['user_id']) . ' ORDER BY `id` DESC LIMIT 1';
+        $sql = 'SELECT `user_log_id` AS "id", `user_log_action` AS "action" FROM `users_logs` WHERE `user_id`=' . ($user_id != null ? $user_id : $_SESSION['user_id']) . ' ORDER BY `user_log_id` DESC LIMIT 1';
         $get_last_log = $this->db_read($sql);
         if ($this->db_num_rows($get_last_log) > 0) {
             $last_log = $this->db_object($get_last_log);
             if ($last_log->action != $action) {
-                $sql = 'INSERT INTO `users_logs` (`user_id`, `date`, `action`' . ($description != null ? ', `description`' : '') . ') VALUES ("' . ($user_id != null ? $user_id : $_SESSION['user_id']) . '", "' . date('Y-m-d H:i:s') . '", "' . addslashes($action) . '"' . ($description != null ? ', "' . addslashes($description) . '"' : '') . ')';
+                $sql = 'INSERT INTO `users_logs` (`user_id`, `user_log_date`, `user_log_action`' . ($description != null ? ', `user_log_description`' : '') . ') VALUES ("' . ($user_id != null ? $user_id : $_SESSION['user_id']) . '", "' . date('Y-m-d H:i:s') . '", "' . addslashes($action) . '"' . ($description != null ? ', "' . addslashes($description) . '"' : '') . ')';
                 $this->db_create($sql);
             }
         } else {
-            $sql = 'INSERT INTO `users_logs` (`user_id`, `date`, `action`' . ($description != null ? ', `description`' : '') . ') VALUES ("' . ($user_id != null ? $user_id : $_SESSION['user_id']) . '", "' . date('Y-m-d H:i:s') . '", "' . addslashes($action) . '"' . ($description != null ? ', "' . addslashes($description) . '"' : '') . ')';
+            $sql = 'INSERT INTO `users_logs` (`user_id`, `user_log_date`, `user_log_action`' . ($description != null ? ', `user_log_description`' : '') . ') VALUES ("' . ($user_id != null ? $user_id : $_SESSION['user_id']) . '", "' . date('Y-m-d H:i:s') . '", "' . addslashes($action) . '"' . ($description != null ? ', "' . addslashes($description) . '"' : '') . ')';
             $this->db_create($sql);
         }
     }

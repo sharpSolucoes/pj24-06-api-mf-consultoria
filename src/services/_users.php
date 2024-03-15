@@ -23,13 +23,13 @@ class Users extends API_configuration
         "' . $status . '"
         ';
 
-        $sql = 'INSERT INTO `users` (`name`, `email`, `phone`, `password`, `status`) VALUES (' . $values . ')';
+        $sql = 'INSERT INTO `users` (`user_name`, `user_email`, `user_phone`, `user_password`, `user_status`) VALUES (' . $values . ')';
         $create_user = $this->db_create($sql);
         if ($create_user) {
             $user_id = $create_user;
 
             $slug = $this->slugify($user_id . '-' . $name);
-            $sql = 'UPDATE `users` SET `slug` = "' . $slug . '" WHERE `id` = ' . $user_id;
+            $sql = 'UPDATE `users` SET `user_slug` = "' . $slug . '" WHERE `user_id` = ' . $user_id;
             $this->db_update($sql);
 
             for ($i = 0; $i < count($permissions); $i++) {
@@ -41,7 +41,7 @@ class Users extends API_configuration
                     $permission_data_value = $permission_data[$permission_data_key[$j]] ? "true" : "false";
 
                     $permission = $permission_key[$i] . '.' . $permission_data_key[$j];
-                    $sql = 'UPDATE `users_permissions` SET `status` = "' . $permission_data_value . '" WHERE `user_id` = ' . $user_id . ' AND `permission` = "' . $permission . '"';
+                    $sql = 'UPDATE `users_permissions` SET `user_permission_status` = "' . $permission_data_value . '" WHERE `user_id` = ' . $user_id . ' AND `user_permission_permission` = "' . $permission . '"';
                     $this->db_update($sql);
                 }
             }
@@ -56,7 +56,7 @@ class Users extends API_configuration
 
     public function read()
     {
-        $sql = 'SELECT `id`, `name`, `phone`, `slug`, `status` FROM `users` WHERE `is_deleted` = "false"';
+        $sql = 'SELECT `user_id` AS "id", `user_name` AS "name", `user_phone` AS "phone", `user_slug` AS "slug", `user_status` AS "status" FROM `users` WHERE `user_is_deleted` = "false"';
         $get_users_data = $this->db_read($sql);
         if ($this->db_num_rows($get_users_data) > 0) {
             $users_data = [];
@@ -77,14 +77,14 @@ class Users extends API_configuration
 
     public function read_by_slug(string $slug)
     {
-        $sql = 'SELECT `id`, `name`, `email`, `phone`, `status` FROM `users` WHERE `slug` = "' . $slug . '"';
+        $sql = 'SELECT `user_id` AS "id", `user_name` AS "name", `user_email` AS "email", `user_phone` AS "phone", `user_status` AS "status" FROM `users` WHERE `user_slug` = "' . $slug . '"';
         $get_user_data = $this->db_read($sql);
         if ($this->db_num_rows($get_user_data) > 0) {
             $user_data = $this->db_object($get_user_data);
             $user_data->id = (int) $user_data->id;
             $user_data->status = $user_data->status == 'true' ? true : false;
 
-            $sql = 'SELECT `permission`, `status` FROM `users_permissions` WHERE `user_id` = ' . $user_data->id;
+            $sql = 'SELECT `user_permission_permission` AS "permission", `user_permission_status` AS "status" FROM `users_permissions` WHERE `user_id` = ' . $user_data->id;
             $user_permissions = $this->db_read($sql);
             if ($this->db_num_rows($user_permissions) > 0) {
                 $permissions = [];
@@ -119,14 +119,14 @@ class Users extends API_configuration
         }
 
         $values = '
-        `name` = "' . $name . '",
-        `email` = "' . $email . '",
-        `phone` = "' . $phone . '",
-        ' . ($changePassword ? '`password` = "' . password_hash($password_confirmation, PASSWORD_BCRYPT, ['cost' => 12]) . '",' : '') . '
-        `status` = "' . $status . '",
-        `slug` = "' . $this->slugify($id . '-' . $name) . '"';
+        `user_name` = "' . $name . '",
+        `user_email` = "' . $email . '",
+        `user_phone` = "' . $phone . '",
+        ' . ($changePassword ? '`user_password` = "' . password_hash($password_confirmation, PASSWORD_BCRYPT, ['cost' => 12]) . '",' : '') . '
+        `user_status` = "' . $status . '",
+        `user_slug` = "' . $this->slugify($id . '-' . $name) . '"';
         
-        $sql = 'UPDATE `users` SET ' . $values . ' WHERE `id` = ' . $id;
+        $sql = 'UPDATE `users` SET ' . $values . ' WHERE `user_id` = ' . $id;
 
         $update_user = $this->db_update($sql);
         if ($update_user) {
@@ -139,7 +139,7 @@ class Users extends API_configuration
                     $permission_data_value = $permission_data[$permission_data_key[$j]] ? "true" : "false";
 
                     $permission = $permission_key[$i] . '.' . $permission_data_key[$j];
-                    $sql = 'UPDATE `users_permissions` SET `status` = "' . $permission_data_value . '" WHERE `user_id` = ' . $id . ' AND `permission` = "' . $permission . '"';
+                    $sql = 'UPDATE `users_permissions` SET `user_permission_status` = "' . $permission_data_value . '" WHERE `user_id` = ' . $id . ' AND `user_permission_permission` = "' . $permission . '"';
                     $this->db_update($sql);
                 }
             }
@@ -159,7 +159,7 @@ class Users extends API_configuration
 
     public function delete(string $slug)
     {
-        $sql = 'UPDATE `users` SET `is_deleted` = "true" WHERE `slug` = "' . $slug . '"';
+        $sql = 'UPDATE `users` SET `user_is_deleted` = "true" WHERE `user_slug` = "' . $slug . '"';
         $delete_user = $this->db_delete($sql);
         if ($delete_user) {
             $this->generate_user_log("users.delete");
@@ -172,7 +172,7 @@ class Users extends API_configuration
 
     protected function verify_exist_email(string $email, string $id = "")
     {
-        $sql = 'SELECT `id` FROM `users` WHERE `email` = "' . $email . '" AND `is_deleted` = "false"';
+        $sql = 'SELECT `user_id` AS "id" FROM `users` WHERE `user_email` = "' . $email . '" AND `user_is_deleted` = "false"';
         $get_user_email = $this->db_read($sql);
         if ($this->db_num_rows($get_user_email) > 0) {
             $user_data = $this->db_object($get_user_email);

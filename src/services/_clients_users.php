@@ -20,13 +20,13 @@ class Clients_Users extends API_configuration
         "' . $phone . '"
         ';
 
-        $sql = 'INSERT INTO `clients_users` (`client_id`, `name`, `email`, `phone`) VALUES (' . $values . ')';
+        $sql = 'INSERT INTO `clients_users` (`client_id`, `client_user_name`, `client_user_email`, `client_user_phone`) VALUES (' . $values . ')';
         $create_client_user = $this->db_create($sql);
         if ($create_client_user) {
             $client_user_id = $create_client_user;
 
             $slug = $this->slugify($client_user_id . '-' . $name);
-            $sql = 'UPDATE `clients_users` SET `slug` = "' . $slug . '" WHERE `id` = ' . $client_user_id;
+            $sql = 'UPDATE `clients_users` SET `client_user_slug` = "' . $slug . '" WHERE `client_user_id` = ' . $client_user_id;
             $this->db_update($sql);
 
             $this->generate_user_log("client.create_user");
@@ -40,7 +40,7 @@ class Clients_Users extends API_configuration
     public function read_by_client_id(
         int $client_id
     ) {
-        $sql = "SELECT `id`, `name`, `email`, `phone` FROM `clients_users` WHERE `client_id` = " . $client_id . " AND `is_deleted` = 'false'";
+        $sql = "SELECT `client_user_id` AS 'id', `client_user_name` AS 'name', `client_user_email` AS 'email', `client_user_phone` AS 'phone' FROM `clients_users` WHERE `client_id` = " . $client_id . " AND `client_user_is_deleted` = 'false'";
         $get_users = $this->db_read($sql);
         if ($this->db_num_rows($get_users) > 0) {
             $users = [];
@@ -68,11 +68,11 @@ class Clients_Users extends API_configuration
         }
 
         $values = '
-            `name` = "' . $name . '",
-            `email` = "' . $email . '",
-            `phone` = "' . $phone . '"';
+            `client_user_name` = "' . $name . '",
+            `client_user_email` = "' . $email . '",
+            `client_user_phone` = "' . $phone . '"';
 
-        $sql = 'UPDATE `clients_users` SET ' . $values . ' WHERE `id` = ' . $id;
+        $sql = 'UPDATE `clients_users` SET ' . $values . ' WHERE `client_user_id` = ' . $id;
         $update_client_user = $this->db_update($sql);
         if ($update_client_user) {
             $this->generate_user_log("client.update_user");
@@ -85,7 +85,7 @@ class Clients_Users extends API_configuration
 
     public function delete(int $id)
     {
-        $sql = "UPDATE `clients_users` SET `is_deleted` = 'true' WHERE `id` = " . $id;
+        $sql = "UPDATE `clients_users` SET `client_user_is_deleted` = 'true' WHERE `client_user_id` = " . $id;
         $delete_client_user = $this->db_delete($sql);
         if ($delete_client_user) {
             $this->generate_user_log("client.delete_user");
@@ -98,10 +98,10 @@ class Clients_Users extends API_configuration
 
     protected function verify_exist_email(string $email, string $id = "")
     {
-        $sql = 'SELECT `id` FROM `clients` WHERE `email` = "' . $email . '" AND `is_deleted` = "false"';
+        $sql = 'SELECT `client_id` AS "id" FROM `clients` WHERE `client_email` = "' . $email . '" AND `client_is_deleted` = "false"';
         $get_client_email = $this->db_read($sql);
         if ($this->db_num_rows($get_client_email) == 0) {
-            $sql = 'SELECT `id` FROM `clients_users` WHERE `email` = "' . $email . '" AND `is_deleted` = "false"';
+            $sql = 'SELECT `client_user_id` AS "id" FROM `clients_users` WHERE `client_user_email` = "' . $email . '" AND `client_user_is_deleted` = "false"';
             $get_user_email = $this->db_read($sql);
             if ($this->db_num_rows($get_user_email) > 0) {
                 $user_data = $this->db_object($get_user_email);

@@ -2,4 +2,6 @@
 
 **Notas da versão:**
 
-- [x] Desenvolvimento do CRUD(Criação, Leitura, Atualização e Deleção) de Clientes, com isso também foi adicionado o CRUD de usuários do cliente e também relatórios do cliente, uma vez que funcionam a partir de um cliente.
+- [x] Mudança no nome de quase todas as colunas do banco de dados afim de seguir o novo padrão;
+- [x] Definição de uma variável de base url para as imagens upadas no momento de busca-las.
+
