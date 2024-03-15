@@ -3,12 +3,14 @@ class Clients extends API_configuration
 {
     private $users;
     private $reports;
+    private $emails;
 
     function __construct()
     {
         parent::__construct();
         $this->users = new Clients_Users();
         $this->reports = new Clients_Reports();
+        $this->emails = new Clients_Emails();
     }
 
     public function create(object $parms)
@@ -22,7 +24,7 @@ class Clients extends API_configuration
         $status = $parms->status;
         $address = (array) $parms->address;
 
-        if ($this->verify_exist_email($email)) {
+        if ($this->emails->read_by_email($email)) {
             http_response_code(409);
             return ['message' => "Email already exists"];
         }
@@ -60,6 +62,8 @@ class Clients extends API_configuration
                 $sql = 'UPDATE `clients` SET `client_logo` = "' . $path_logo . '" WHERE `client_id` = ' . $client_id;
                 $this->db_update($sql);
             }
+
+            $this->emails->create("client", $client_id, $email);
 
             $this->generate_user_log("clients.create");
             return ['message' => "Client created successfully"];
@@ -101,7 +105,7 @@ class Clients extends API_configuration
 
     public function read_by_slug(string $slug)
     {
-        $sql = 'SELECT `client_id` AS "id", `client_status` AS "status", `client_name` AS "name", `client_logo` AS "logo", `client_cnpj` AS "cnpj", `client_email` AS "email", `client_phone` AS "phone", `client_street` AS "street", `client_number` AS "number", `client_complement` AS "complement", `client_neighborhood` AS "neighborhood", `client_city` AS "city", `client_state` AS "state", `client_zip` AS "zip", `client_slug` AS "slug" FROM `clients` WHERE `client_slug` = "' . $slug . '"';
+        $sql = 'SELECT `client_id` AS "id", `client_status` AS "status", `client_name` AS "name", `client_logo` AS "logo", `client_cnpj` AS "cnpj", `client_email` AS "email", `client_phone` AS "phone", `client_street` AS "street", `client_number` AS "number", `client_complement` AS "complement", `client_neighborhood` AS "neighborhood", `client_city` AS "city", `client_state` AS "state", `client_zip` AS "zip", `client_slug` AS "slug", `client_is_deleted` AS "isDeleted" FROM `clients` WHERE `client_slug` = "' . $slug . '"';
         $get_client_data = $this->db_read($sql);
         if ($this->db_num_rows($get_client_data) > 0) {
             $client_data = $this->db_object($get_client_data);
@@ -149,7 +153,7 @@ class Clients extends API_configuration
         $address = (array) $parms->address;
         $changeLogo = $parms->changeLogo;
 
-        if ($this->verify_exist_email($email, $id)) {
+        if ($this->emails->read_by_email($email) && (($this->emails->read_by_email($email)->client_id != "" && $this->emails->read_by_email($email)->client_id != $id) || $this->emails->read_by_email($email)->client_user_id != "")) {
             http_response_code(409);
             return ['message' => "Email already exists"];
         }
@@ -197,6 +201,8 @@ class Clients extends API_configuration
                 $this->db_update($sql);
             }
 
+            $this->emails->update("client", $id, $email);
+
             $this->generate_user_log("clients.update");
             return ['message' => "Client updated successfully"];
         } else {
@@ -216,33 +222,14 @@ class Clients extends API_configuration
             $sql = "UPDATE `clients_reports` SET `client_report_is_deleted` = 'true' WHERE `client_id` = " . $delete_client;
             $this->db_delete($sql);
 
+            $client = $this->read_by_slug($slug);
+            $this->emails->delete($client->email);
+
             $this->generate_user_log("clients.delete");
             return ['message' => "Client deleted successfully"];
         } else {
             http_response_code(400);
             return ['message' => "Error deleting client"];
-        }
-    }
-
-    protected function verify_exist_email(string $email, string $id = "")
-    {
-        $sql = 'SELECT `client_user_id` AS "id" FROM `clients_users` WHERE `client_user_email` = "' . $email . '" AND `client_user_is_deleted` = "false"';
-        $get_user_email = $this->db_read($sql);
-        if ($this->db_num_rows($get_user_email) == 0) {
-            $sql = 'SELECT `client_id` AS "id" FROM `clients` WHERE `client_email` = "' . $email . '" AND `client_is_deleted` = "false"';
-            $get_client_email = $this->db_read($sql);
-            if ($this->db_num_rows($get_client_email) > 0) {
-                $client_data = $this->db_object($get_client_email);
-                if ($client_data->id == $id) {
-                    return false;
-                } else {
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return true;
         }
     }
 }

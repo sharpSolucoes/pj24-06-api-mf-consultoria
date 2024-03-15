@@ -1,6 +1,14 @@
 <?php
 class Clients_Users extends API_configuration
 {
+    private $emails;
+
+    function __construct()
+    {
+        parent::__construct();
+        $this->emails = new Clients_Emails();
+    }
+
     public function create(object $parms)
     {
         $client_id = $parms->clientId;
@@ -8,7 +16,7 @@ class Clients_Users extends API_configuration
         $email = $parms->email;
         $phone = $parms->phone;
 
-        if ($this->verify_exist_email($email)) {
+        if ($this->emails->read_by_email($email)) {
             http_response_code(409);
             return ['message' => "Email already exists"];
         }
@@ -28,6 +36,8 @@ class Clients_Users extends API_configuration
             $slug = $this->slugify($client_user_id . '-' . $name);
             $sql = 'UPDATE `clients_users` SET `client_user_slug` = "' . $slug . '" WHERE `client_user_id` = ' . $client_user_id;
             $this->db_update($sql);
+
+            $this->emails->create("client_user", $client_user_id, $email);
 
             $this->generate_user_log("client.create_user");
             return ['message' => "User created successfully"];
@@ -55,6 +65,20 @@ class Clients_Users extends API_configuration
         }
     }
 
+    public function read_by_id(
+        int $id
+    ) {
+        $sql = "SELECT `client_user_id` AS 'id', `client_user_name` AS 'name', `client_user_email` AS 'email', `client_user_phone` AS 'phone', `client_user_is_deleted` AS 'isDeleted' FROM `clients_users` WHERE `client_user_id` = " . $id;
+        $get_user = $this->db_read($sql);
+        if ($this->db_num_rows($get_user) > 0) {
+            $user = $this->db_object($get_user);
+            $user->id = (int) $user->id;
+            return $user;
+        } else {
+            return [];
+        }
+    }
+
     public function update(object $parms)
     {
         $id = $parms->id;
@@ -62,7 +86,7 @@ class Clients_Users extends API_configuration
         $email = $parms->email;
         $phone = $parms->phone;
 
-        if ($this->verify_exist_email($email, $id)) {
+        if ($this->emails->read_by_email($email) && ($this->emails->read_by_email($email)->client_id != "" || ($this->emails->read_by_email($email)->client_user_id != "" && $this->emails->read_by_email($email)->client_user_id != $id))) {
             http_response_code(409);
             return ['message' => "Email already exists"];
         }
@@ -75,7 +99,11 @@ class Clients_Users extends API_configuration
         $sql = 'UPDATE `clients_users` SET ' . $values . ' WHERE `client_user_id` = ' . $id;
         $update_client_user = $this->db_update($sql);
         if ($update_client_user) {
+
+            $this->emails->update("client_user", $id, $email);
+
             $this->generate_user_log("client.update_user");
+
             return ['message' => "User updated successfully"];
         } else {
             http_response_code(400);
@@ -88,33 +116,15 @@ class Clients_Users extends API_configuration
         $sql = "UPDATE `clients_users` SET `client_user_is_deleted` = 'true' WHERE `client_user_id` = " . $id;
         $delete_client_user = $this->db_delete($sql);
         if ($delete_client_user) {
+            $client_user = $this->read_by_id($id);
+            $this->emails->delete($client_user->email);
+
             $this->generate_user_log("client.delete_user");
+            
             return ['message' => "User deleted successfully"];
         } else {
             http_response_code(400);
             return ['message' => "Error deleting user"];
-        }
-    }
-
-    protected function verify_exist_email(string $email, string $id = "")
-    {
-        $sql = 'SELECT `client_id` AS "id" FROM `clients` WHERE `client_email` = "' . $email . '" AND `client_is_deleted` = "false"';
-        $get_client_email = $this->db_read($sql);
-        if ($this->db_num_rows($get_client_email) == 0) {
-            $sql = 'SELECT `client_user_id` AS "id" FROM `clients_users` WHERE `client_user_email` = "' . $email . '" AND `client_user_is_deleted` = "false"';
-            $get_user_email = $this->db_read($sql);
-            if ($this->db_num_rows($get_user_email) > 0) {
-                $user_data = $this->db_object($get_user_email);
-                if ($user_data->id == $id) {
-                    return false;
-                } else {
-                    return true;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return true;
         }
     }
 }
