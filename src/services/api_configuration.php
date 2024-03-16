@@ -24,13 +24,10 @@ class API_configuration
             $server = "localhost";
             $db_name = "u524077001_mf_consultoria";
             $user = "u524077001_mf_consultoria";
-            $password = "";
-            $api_token = "";
+            $password = "ptBqy82rqOeiSTqBv6usMJbo1RYBl7sh";
+            $api_token = "rST75SuTmM0MtpreR6WJn1j8q90ybRu3";
             $connection = mysqli_connect($server, $user, $password, $db_name);
         }
-
-        $protocol = 
-
 
         $this->api_token = $api_token;
         $this->connection = $connection;
