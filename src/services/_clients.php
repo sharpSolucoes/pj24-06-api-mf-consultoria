@@ -2,6 +2,7 @@
 class Clients extends API_configuration
 {
     private $users;
+    private $groups;
     private $reports;
     private $emails;
 
@@ -9,6 +10,7 @@ class Clients extends API_configuration
     {
         parent::__construct();
         $this->users = new Clients_Users();
+        $this->groups = new Clients_Reports_Groups();
         $this->reports = new Clients_Reports();
         $this->emails = new Clients_Emails();
     }
@@ -132,6 +134,7 @@ class Clients extends API_configuration
             $client_data->logo = $client_data->logo != '' ? $this->base_url_image . $client_data->logo : null;
 
             $client_data->users = $this->users->read_by_client_id($client_data->id);
+            $client_data->groups = $this->groups->read_by_client_id($client_data->id);
             $client_data->reports = $this->reports->read_by_client_id($client_data->id);
 
             $this->generate_user_log("clients.read_by_slug");

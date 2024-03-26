@@ -2,4 +2,4 @@
 
 **Notas da versão:**
 
-- [x] Desenvolvimento de toda a funcionalidade de unificação dos emails dos clientes e usuários dos clientes em uma única tabela.
+- [x] Inclusão de novas informações para os clientes do sistema: agora os clientes também possuem as informações de grupos que são utilizadas nos relatórios. Além disso, foram incluídos os campo de Cargo e avatar no cadastro dos usuários dos clientes.

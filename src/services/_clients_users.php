@@ -13,6 +13,7 @@ class Clients_Users extends API_configuration
     {
         $client_id = $parms->clientId;
         $name = $parms->name;
+        $position = $parms->position;
         $email = $parms->email;
         $phone = $parms->phone;
 
@@ -24,11 +25,12 @@ class Clients_Users extends API_configuration
         $values = '
         "' . $client_id . '",
         "' . $name . '",
+        "' . $position . '",
         "' . $email . '",
         "' . $phone . '"
         ';
 
-        $sql = 'INSERT INTO `clients_users` (`client_id`, `client_user_name`, `client_user_email`, `client_user_phone`) VALUES (' . $values . ')';
+        $sql = 'INSERT INTO `clients_users` (`client_id`, `client_user_name`, `client_user_position`, `client_user_email`, `client_user_phone`) VALUES (' . $values . ')';
         $create_client_user = $this->db_create($sql);
         if ($create_client_user) {
             $client_user_id = $create_client_user;
@@ -50,7 +52,7 @@ class Clients_Users extends API_configuration
     public function read_by_client_id(
         int $client_id
     ) {
-        $sql = "SELECT `client_user_id` AS 'id', `client_user_name` AS 'name', `client_user_email` AS 'email', `client_user_phone` AS 'phone' FROM `clients_users` WHERE `client_id` = " . $client_id . " AND `client_user_is_deleted` = 'false'";
+        $sql = "SELECT `client_user_id` AS 'id', `client_user_name` AS 'name', `client_user_position` AS 'position', `client_user_email` AS 'email', `client_user_phone` AS 'phone' FROM `clients_users` WHERE `client_id` = " . $client_id . " AND `client_user_is_deleted` = 'false'";
         $get_users = $this->db_read($sql);
         if ($this->db_num_rows($get_users) > 0) {
             $users = [];
@@ -68,7 +70,7 @@ class Clients_Users extends API_configuration
     public function read_by_id(
         int $id
     ) {
-        $sql = "SELECT `client_user_id` AS 'id', `client_user_name` AS 'name', `client_user_email` AS 'email', `client_user_phone` AS 'phone', `client_user_is_deleted` AS 'isDeleted' FROM `clients_users` WHERE `client_user_id` = " . $id;
+        $sql = "SELECT `client_user_id` AS 'id', `client_user_name` AS 'name', `client_user_position` AS 'position', `client_user_email` AS 'email', `client_user_phone` AS 'phone', `client_user_is_deleted` AS 'isDeleted' FROM `clients_users` WHERE `client_user_id` = " . $id;
         $get_user = $this->db_read($sql);
         if ($this->db_num_rows($get_user) > 0) {
             $user = $this->db_object($get_user);
@@ -83,6 +85,7 @@ class Clients_Users extends API_configuration
     {
         $id = $parms->id;
         $name = $parms->name;
+        $position = $parms->position;
         $email = $parms->email;
         $phone = $parms->phone;
 
@@ -93,6 +96,7 @@ class Clients_Users extends API_configuration
 
         $values = '
             `client_user_name` = "' . $name . '",
+            `client_user_position` = "' . $position . '",
             `client_user_email` = "' . $email . '",
             `client_user_phone` = "' . $phone . '"';
 

@@ -1,0 +1,2 @@
+ALTER TABLE `clients_users` ADD COLUMN `client_user_avatar` varchar(255) DEFAULT '/default.png' AFTER `client_user_name`;
+ALTER TABLE `clients_users` ADD COLUMN `client_user_position` varchar(255) NOT NULL AFTER `client_user_avatar`;
