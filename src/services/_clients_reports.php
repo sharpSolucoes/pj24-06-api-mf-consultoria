@@ -47,13 +47,44 @@ class Clients_Reports extends API_configuration
                 $group_this_report = $this->clients_reports_groups->read_by_id($report->groupId);
                 $report->group = $group_this_report;
                 unset($report->groupId);
-                
+
                 array_push($reports, $report);
             }
 
             return $reports;
         } else {
             return [];
+        }
+    }
+
+    public function read_by_url(
+        object $parms
+    ) {
+        $group_name = $parms->group;
+        $group_name = str_replace("_", " ", $parms->group);
+        $report_name = str_replace("_", " ",  $parms->report);
+
+        $client_id = $parms->clientId;
+
+        $group = $this->clients_reports_groups->read_by_name_and_client_id($group_name, $client_id);
+        if ($group !== null) {
+            $sql = "SELECT `client_report_id` AS 'id', `client_report_description` AS 'description', `client_report_url` AS 'url' FROM `clients_reports` WHERE `client_reports_group_id` = " . $group->id . " AND `client_report_description` = '" . $report_name . "' AND `client_id` = '" . $client_id . "' AND`client_report_is_deleted` = 'false'";
+            $get_report = $this->db_read($sql);
+            if ($this->db_num_rows($get_report) > 0) {
+                $report = $this->db_object($get_report);
+                $report->id = (int) $report->id;
+
+                $report->group = [
+                    'id' => $group->id,
+                    'description' => $group->description
+                ];
+
+                return $report;
+            } else {
+                http_response_code(404);
+            }
+        } else {
+            http_response_code(404);
         }
     }
 

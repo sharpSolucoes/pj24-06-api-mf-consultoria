@@ -25,7 +25,7 @@ class Clients_Reports_Groups extends API_configuration
     public function read_by_client_id(
         int $client_id
     ) {
-        $sql = "SELECT `client_reports_group_id` AS 'id', `client_reports_group_description` AS 'description' FROM `clients_reports_groups` WHERE `client_id` = " . $client_id . " AND `client_reports_group_is_deleted` = 'false'";
+        $sql = "SELECT `client_reports_group_id` AS 'id', `client_reports_group_description` AS 'description' FROM `clients_reports_groups` WHERE `client_id` = '" . $client_id . "' AND `client_reports_group_is_deleted` = 'false'";
         $get_reports_groups = $this->db_read($sql);
         if ($this->db_num_rows($get_reports_groups) > 0) {
             $reports_groups = [];
@@ -43,6 +43,20 @@ class Clients_Reports_Groups extends API_configuration
     public function read_by_id(int $id)
     {
         $sql = "SELECT `client_reports_group_id` AS 'id', `client_reports_group_description` AS 'description' FROM `clients_reports_groups` WHERE `client_reports_group_id` = " . $id . " AND `client_reports_group_is_deleted` = 'false'";
+        $get_reports_group = $this->db_read($sql);
+        if ($this->db_num_rows($get_reports_group) > 0) {
+            $reports_group = $this->db_object($get_reports_group);
+            $reports_group->id = (int) $reports_group->id;
+
+            return $reports_group;
+        } else {
+            return [];
+        }
+    }
+
+    public function read_by_name_and_client_id(string $name, int $client_id)
+    {
+        $sql = "SELECT `client_reports_group_id` AS 'id', `client_reports_group_description` AS 'description' FROM `clients_reports_groups` WHERE `client_reports_group_description` = '" . $name . "' AND `client_id` = " . $client_id . " AND `client_reports_group_is_deleted` = 'false'";
         $get_reports_group = $this->db_read($sql);
         if ($this->db_num_rows($get_reports_group) > 0) {
             $reports_group = $this->db_object($get_reports_group);

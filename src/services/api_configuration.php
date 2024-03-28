@@ -250,7 +250,19 @@ class API_configuration
                     return false;
                 }
             } else {
-                return false;
+                $sql_token = str_replace("Bearer ", "", $this->token);
+                $sql = 'SELECT `client_id`, `client_user_id`, `api_session_client_expires` AS "expires" FROM `api_sessions_clients` WHERE `api_session_client_token` = "' . addslashes($sql_token) . '"';
+                $get_user_token_data = $this->db_read($sql);
+                if ($this->db_num_rows($get_user_token_data) > 0) {
+                    $user_token_data = $this->db_object($get_user_token_data);
+                    if (strtotime($user_token_data->expires) > strtotime($this->now)) {
+                        return $user_token_data->client_id != null ? $user_token_data->client_id : $user_token_data->client_user_id;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return false;
+                }
             }
         } else if ($type == "api") {
             if ($this->token == $this->api_token) {

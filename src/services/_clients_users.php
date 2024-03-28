@@ -117,7 +117,7 @@ class Clients_Users extends API_configuration
 
     public function delete(int $id)
     {
-        $sql = "UPDATE `clients_users` SET `client_user_is_deleted` = 'true' WHERE `client_user_id` = " . $id;
+        $sql = "UPDATE `clients_users` SET `client_user_is_deleted` = 'true', `client_user_status` = 'false' WHERE `client_user_id` = " . $id;
         $delete_client_user = $this->db_delete($sql);
         if ($delete_client_user) {
             $client_user = $this->read_by_id($id);

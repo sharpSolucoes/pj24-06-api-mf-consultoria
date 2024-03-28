@@ -1,6 +1,6 @@
 <?php
 date_default_timezone_set('America/Sao_Paulo');
-define('VERSION', '24.5.0-alpha');
+define('VERSION', '24.6.0-alpha');
 define('SANDBOX', false);
 define('CORS_ORIGIN', (SANDBOX ? '*' : '*'));
 
